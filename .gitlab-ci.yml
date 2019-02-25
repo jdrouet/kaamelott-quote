@@ -1,0 +1,104 @@
+stages:
+  - build
+  - publish
+
+build_amd64:
+  image: docker:stable
+  stage: build
+  services:
+    - docker:dind
+  variables:
+    DOCKER_HOST: "tcp://docker:2375"
+    DOCKER_DRIVER: overlay2
+    DOCKER_IMAGE: jdrouet/kaamelott-quote
+  before_script:
+    - echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
+  script:
+    - docker build --build-arg IMAGE_ARCH=amd64 -t $DOCKER_IMAGE:amd64-$CI_COMMIT_SHA -t $DOCKER_IMAGE:amd64-latest .
+    - docker push $DOCKER_IMAGE:amd64-$CI_COMMIT_SHA
+    - docker push $DOCKER_IMAGE:amd64-latest
+
+build_arm64v8:
+  image: docker:stable
+  stage: build
+  services:
+    - docker:dind
+  variables:
+    DOCKER_HOST: "tcp://docker:2375"
+    DOCKER_DRIVER: overlay2
+    DOCKER_IMAGE: jdrouet/kaamelott-quote
+  before_script:
+    - echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
+    - docker run --rm --privileged hypriot/qemu-register
+  script:
+    - docker build --build-arg IMAGE_ARCH=arm64v8 -t $DOCKER_IMAGE:arm64v8-$CI_COMMIT_SHA -t $DOCKER_IMAGE:arm64v8-latest .
+    - docker push $DOCKER_IMAGE:arm64v8-$CI_COMMIT_SHA
+    - docker push $DOCKER_IMAGE:arm64v8-latest
+
+build_arm32v7:
+  image: docker:stable
+  stage: build
+  services:
+    - docker:dind
+  variables:
+    DOCKER_HOST: "tcp://docker:2375"
+    DOCKER_DRIVER: overlay2
+    DOCKER_IMAGE: jdrouet/kaamelott-quote
+  before_script:
+    - echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
+    - docker run --rm --privileged hypriot/qemu-register
+  script:
+    - docker build --build-arg IMAGE_TAG=lts-slim --build-arg IMAGE_ARCH=arm32v7 -t $DOCKER_IMAGE:arm32v7-$CI_COMMIT_SHA -t $DOCKER_IMAGE:arm32v7-latest .
+    - docker push $DOCKER_IMAGE:arm32v7-$CI_COMMIT_SHA
+    - docker push $DOCKER_IMAGE:arm32v7-latest
+
+build_arm32v6:
+  image: docker:stable
+  stage: build
+  services:
+    - docker:dind
+  variables:
+    DOCKER_HOST: "tcp://docker:2375"
+    DOCKER_DRIVER: overlay2
+    DOCKER_IMAGE: jdrouet/kaamelott-quote
+  before_script:
+    - echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
+    - docker run --rm --privileged hypriot/qemu-register
+  script:
+    - docker build --build-arg IMAGE_ARCH=arm32v6 -t $DOCKER_IMAGE:arm32v6-$CI_COMMIT_SHA -t $DOCKER_IMAGE:arm32v6-latest .
+    - docker push $DOCKER_IMAGE:arm32v6-$CI_COMMIT_SHA
+    - docker push $DOCKER_IMAGE:arm32v6-latest
+
+publish-commit:
+  image: docker:stable
+  stage: publish
+  services:
+    - name: docker:dind
+      command: ["--experimental"]
+  variables:
+    DOCKER_HOST: "tcp://docker:2375"
+    DOCKER_DRIVER: overlay2
+    DOCKER_IMAGE: jdrouet/kaamelott-quote
+    DOCKER_CLI_EXPERIMENTAL: enabled
+  before_script:
+    - echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
+  script:
+    - docker manifest create $DOCKER_IMAGE:$CI_COMMIT_SHA $DOCKER_IMAGE:amd64-$CI_COMMIT_SHA $DOCKER_IMAGE:arm64v8-$CI_COMMIT_SHA $DOCKER_IMAGE:arm32v7-$CI_COMMIT_SHA $DOCKER_IMAGE:arm32v6-$CI_COMMIT_SHA
+    - docker manifest push $DOCKER_IMAGE:$CI_COMMIT_SHA
+
+publish-latest:
+  image: docker:stable
+  stage: publish
+  services:
+    - name: docker:dind
+      command: ["--experimental"]
+  variables:
+    DOCKER_HOST: "tcp://docker:2375"
+    DOCKER_DRIVER: overlay2
+    DOCKER_IMAGE: jdrouet/kaamelott-quote
+    DOCKER_CLI_EXPERIMENTAL: enabled
+  before_script:
+    - echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
+  script:
+    - docker manifest create $DOCKER_IMAGE:latest $DOCKER_IMAGE:amd64-latest $DOCKER_IMAGE:arm64v8-latest $DOCKER_IMAGE:arm32v7-latest $DOCKER_IMAGE:arm32v6-latest
+    - docker manifest push $DOCKER_IMAGE:latest
