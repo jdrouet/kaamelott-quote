@@ -8,6 +8,7 @@ const getRandomQuote = () => {
 };
 
 http.createServer(function (req, res) {
+  console.log(Date.now(), 'request a new quote');
   res.writeHead(200, {'Content-Type': 'application/json'});
   res.write(JSON.stringify(getRandomQuote()));
   res.end();
