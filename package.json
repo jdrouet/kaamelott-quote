@@ -4,6 +4,7 @@
   "description": "ON EN A GROS !",
   "main": "main.js",
   "scripts": {
+    "check": "node check.js",
     "start": "node main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

@@ -6,6 +6,9 @@ FROM ${IMAGE_ARCH}/node:${IMAGE_TAG}
 COPY . /code
 WORKDIR /code
 
-EXPOSE 8080
+HEALTHCHECK --interval=30s --timeout=2s --start-period=5s --retries=3 \
+  CMD ["npm", "run", "check"]
+
+EXPOSE 80
 CMD ["npm", "start"]
 

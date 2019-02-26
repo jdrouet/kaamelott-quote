@@ -1,6 +1,6 @@
 const http = require('http');
 const dataset = require('./dataset.json');
-const port = 8080;
+const port = 80;
 
 const getRandomQuote = () => {
   const index = Math.floor(Math.random() * dataset.length);
