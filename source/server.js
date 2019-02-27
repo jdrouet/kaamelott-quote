@@ -1,5 +1,5 @@
 const http = require('http');
-const dataset = require('./dataset.json');
+const dataset = require('../dataset.json');
 const port = 80;
 
 const getRandomQuote = () => {
@@ -13,4 +13,3 @@ http.createServer(function (req, res) {
   res.write(JSON.stringify(getRandomQuote()));
   res.end();
 }).listen(port);
-
