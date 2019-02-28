@@ -1,5 +1,5 @@
 {
-  "name": "kaamelott-quote",
+  "name": "@kaamelott-quote/server",
   "version": "1.0.0",
   "description": "ON EN A GROS !",
   "main": "source/server.js",
