@@ -1,0 +1,13 @@
+#!/bin/bash
+
+printenv
+
+counter=1
+
+while true; do
+  echo "coucou $counter"
+  let "counter=counter+1"
+  sleep 1
+done
+
+
